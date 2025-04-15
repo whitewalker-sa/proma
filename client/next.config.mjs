@@ -9,7 +9,8 @@ const nextConfig = {
         pathname: "/**",
       }
     ]
-  }
+  },
+  output: 'standalone', // Enable standalone output for Docker deployment
 };
 
 export default nextConfig;

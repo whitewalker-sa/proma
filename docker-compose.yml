@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  client:
+    build: 
+      context: ./client
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_BASE_URL=http://server:8000
+    depends_on:
+      - server
+    networks:
+      - proma-network
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/proma?schema=public
+    depends_on:
+      - postgres
+    networks:
+      - proma-network
+    command: sh -c "npx prisma migrate deploy && npm run start"
+
+  postgres:
+    image: postgres:15
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: proma
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - proma-network
+
+networks:
+  proma-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
